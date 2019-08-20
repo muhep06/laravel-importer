@@ -5,6 +5,7 @@ namespace AcikVeri\Importer\JSONImporter;
 
 use AcikVeri\Importer\Models\DynamicModel;
 use GuzzleHttp\Client;
+use Closure;
 
 
 class JSONImporter implements Importer
@@ -30,8 +31,7 @@ class JSONImporter implements Importer
      * @return $this
      */
     public function loadFromString($json) {
-
-        $client = new Client();
+        
         $this->json = json_decode($json);
         return $this;
     }
@@ -110,6 +110,33 @@ class JSONImporter implements Importer
                 }
                 $i++;
                 $model->save();
+            }
+        }
+    }
+
+    /**
+     * @return void
+     */
+    public function update()
+    {
+        foreach ($this->include as $tableName=>$tables) {
+            $model = new DynamicModel();
+            $model->setTable($tableName);
+            foreach ($model->get() as $key=>$data) {
+                foreach ($tables as $column=>$item) {
+                    if ($column !== 'relation') {
+                        $path = $this->get($this->index)[$key]->{$item};
+                        if ($path == "") {
+                            $path = null;
+                        }
+                        if ($data[$column] !== $path) {
+                            if ($path == "") {
+                                $path = null;
+                            }
+                            $model->where('id', $data['id'])->update([ $item => $path ]);
+                        }
+                    }
+                }
             }
         }
     }

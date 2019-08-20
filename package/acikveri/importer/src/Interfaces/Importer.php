@@ -2,6 +2,7 @@
 
 
 namespace AcikVeri\Importer\Interfaces;
+use Closure;
 
 
 interface Importer
@@ -11,7 +12,7 @@ interface Importer
     public function setTable($table);
     public function insert($column, $key);
     public function get(string $path);
-    public function relation($column, \Closure $callback);
+    public function relation($column, Closure $callback);
     public function update();
     public function import();
 
