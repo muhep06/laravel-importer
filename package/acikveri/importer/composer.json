@@ -17,6 +17,7 @@
     },
     "require": {
         "guzzlehttp/guzzle": "~6.0",
+        "webpatser/laravel-uuid": "^3.0",
         "ext-simplexml": "*",
         "ext-json": "*"
     },
