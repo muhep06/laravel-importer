@@ -17,10 +17,6 @@ class CreateExchangeRatesTable extends Migration
             $table->bigIncrements('id');
             $table->string('unit');
             $table->string('isim');
-            $table->string('forexBuying')->nullable();
-            $table->string('forexSelling')->nullable();
-            $table->string('banknoteBuying')->nullable();
-            $table->string('banknoteSelling')->nullable();
             $table->timestamps();
         });
     }
