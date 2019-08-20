@@ -1,0 +1,23 @@
+{
+    "name": "muhep06/importer",
+    "description": "AcikVeri Importer",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Muhep Atasoy",
+            "email": "muhepatasoy06@gmail.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "autoload": {
+        "psr-4": {
+            "AcikVeri\\Importer\\": "src/"
+        }
+    },
+    "require": {
+        "guzzlehttp/guzzle": "~6.0",
+        "ext-simplexml": "*",
+        "ext-json": "*"
+    }
+}
