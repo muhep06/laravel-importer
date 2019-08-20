@@ -7,12 +7,12 @@ use Closure;
 
 interface Importer
 {
-    public function loadFromUrl($url);
-    public function loadFromString($data);
-    public function setTable($table);
-    public function insert($column, $key);
-    public function get(string $path);
-    public function relation($column, Closure $callback);
+    public function loadFromUrl(string $url);
+    public function loadFromString(string $data);
+    public function setTable(string $table);
+    public function insert(string $column, string $key);
+    public function get(string $path = null);
+    public function relation(string $column, Closure $callback);
     public function update();
     public function import();
 
