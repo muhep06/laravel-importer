@@ -8,7 +8,7 @@ use GuzzleHttp\Client;
 use Closure;
 
 
-class JSONImporter implements Importer
+class JSONImporter
 {
     public $json;
     public $index;
@@ -31,7 +31,7 @@ class JSONImporter implements Importer
      * @return $this
      */
     public function loadFromString($json) {
-        
+
         $this->json = json_decode($json);
         return $this;
     }
@@ -68,9 +68,12 @@ class JSONImporter implements Importer
         return $this;
     }
 
-    public function get(string $path)
+    public function get(string $path = null)
     {
         $load = $this->json;
+        if ($path == null) {
+            return $load;
+        }
         foreach (explode('.', $path) as $item) {
             $load = $load->{$item};
         }
@@ -81,10 +84,9 @@ class JSONImporter implements Importer
      * @return void
      */
     public function import() {
-        $json = $this->get($this->index);
         foreach ($this->include as $tableName=>$tables) {
             $i = 1;
-            foreach ($json as $index) {
+            foreach ($this->get($this->index) as $index) {
                 $model = new DynamicModel();
                 $model->setTable($tableName);
                 $relation = new JSONImporterRelation($model, $this, $this->json, $i);
