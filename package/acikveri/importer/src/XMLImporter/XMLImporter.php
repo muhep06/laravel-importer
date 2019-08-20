@@ -5,49 +5,41 @@ namespace AcikVeri\Importer\XMLImporter;
 
 
 use AcikVeri\Importer\Models\DynamicModel;
+use Closure;
 use GuzzleHttp\Client;
 
 class XMLImporter
 {
     public $xml;
-    private $index;
+    public $index;
     private $include;
     private $table;
 
-    public function __construct()
-    {
-        $this->include = [];
-    }
-
-    /*
+    /**
      * @param string $url
+     * @return $this
      */
-    public function loadFromUrl($url) {
+    public function loadFromUrl(string $url)
+    {
         $client = new Client();
         $this->xml = simplexml_load_string($client->get($url)->getBody());
         return $this;
     }
 
-    /*
-     * @param string $data
+    /**
+     * @param string $xml
+     * @return $this
      */
-    public function loadFromString($data)
+    public function loadFromString(string $xml)
     {
-        $this->xml = simplexml_load_string($data);
+        $client = new Client();
+        $this->xml = simplexml_load_string($xml);
         return $this;
     }
 
-    /*
-     * @param string $key
-     */
-    public function setIndex(string $key)
-    {
-        $this->index = $key;
-        return $this;
-    }
-
-    /*
-     * @param string $table
+    /**
+     * @param $table
+     * @return $this
      */
     public function setTable($table)
     {
@@ -56,99 +48,53 @@ class XMLImporter
         return $this;
     }
 
-    /*
-     * @param string
+    /**
+     * @param $column
+     * @param $key
+     * @return $this
      */
-
-    public function insert($column, $key) {
+    public function insert($column, $key)
+    {
         $this->include[$this->table][$column] = $key;
         return $this;
     }
 
-    /*
-     * @param string $column, $key
+    /**
+     * @param $column
+     * @param Closure $callback
+     * @return $this
      */
-    public function relation($column, \Closure $callback) {
-        //$this->include[$this->table]['relation'] = [ 'column' => $column ];
+    public function relation($column, Closure $callback)
+    {
         $this->include[$this->table]['relation'] = [ 'column' => $column, 'closure' => $callback ];
         return $this;
     }
 
-    /**
-     * @return array
-     */
-    public function getIncludes()
+    public function get(string $path)
     {
-        return $this->include;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getIndex()
-    {
-        return $this->index;
-    }
-
-    public function update()
-    {
-        $data = $this->include;
-        $xml = $this->xml;
-        $indexes = $xml->xpath($this->index);
-
-        foreach ($data as $tableName=>$table) {
-            if (SchemaCreator::isEmpty($tableName)) {
-                break;
-            }
-            $model = new DynamicModel();
-            $model->setTable($tableName);
-            foreach ($model->get() as $key=>$col) {
-                foreach ($table as $itemName=>$item) {
-                    if ($itemName !== 'relation') {
-                        $path = $indexes[$key]->xpath($item)[0];
-                        if ($path == "") {
-                            $path = null;
-                        }
-                        if ($col[$itemName] !== $path) {
-                            if ($path == "") {
-                                $path = null;
-                            }
-                            $model->where('id', $col['id'])->update([ $item => $path ]);
-                        }
-                    }
-                }
-            }
+        $load = $this->xml;
+        foreach (explode('.', $path) as $item) {
+            $load = $load->{$item};
         }
-        return $this;
+        return $load;
     }
 
-    /*
-     * @param array $data
+    /**
+     * @return void
      */
-    public function import()
-    {
-        $data = $this->include;
-        $xml = $this->xml;
-        $indexes = $xml->xpath($this->index);
-        foreach ($data as $tableName=>$table) {
-            if (!SchemaCreator::isEmpty($tableName)) {
-                break;
-            }
+    public function import() {
+        foreach ($this->include as $tableName=>$tables) {
             $i = 1;
-            foreach ($indexes as $index) {
+            foreach ($this->get($this->index) as $index) {
                 $model = new DynamicModel();
                 $model->setTable($tableName);
-                $relation = new XMLImporterRelation();
-                $relation->setModel($model);
-                $relation->setXml($xml);
-                $relation->setParser($this);
-                $relation->setLoopIndex($i);
+                $relation = new XMLImporterRelation($model, $this, $this->xml, $i);
                 foreach ($index as $key=>$path) {
-                    foreach ($table as $itemName=>$item) {
-                        if ($itemName !== 'relation') {
+                    foreach ($tables as $column=>$item) {
+                        if ($column !== 'relation') {
                             if ($key == $item) {
                                 if ($path != null && $path != '') {
-                                    $model->{$itemName} = $path;
+                                    $model->{$column} = $path;
                                 }
                             }
                         } else {
@@ -159,13 +105,39 @@ class XMLImporter
                                 } else {
                                     $model->{$item['column']} = $i;
                                 }
-
                             }
                         }
                     }
                 }
                 $i++;
                 $model->save();
+            }
+        }
+    }
+
+    /**
+     * @return void
+     */
+    public function update()
+    {
+        foreach ($this->include as $tableName=>$tables) {
+            $model = new DynamicModel();
+            $model->setTable($tableName);
+            foreach ($model->get() as $key=>$data) {
+                foreach ($tables as $column=>$item) {
+                    if ($column !== 'relation') {
+                        $path = $this->get($this->index)[$key]->{$item};
+                        if ($path == "") {
+                            $path = null;
+                        }
+                        if ($data[$column] !== $path) {
+                            if ($path == "") {
+                                $path = null;
+                            }
+                            $model->where('id', $data['id'])->update([ $item => $path ]);
+                        }
+                    }
+                }
             }
         }
     }

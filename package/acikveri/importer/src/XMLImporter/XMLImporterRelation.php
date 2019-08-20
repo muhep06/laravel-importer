@@ -4,71 +4,20 @@
 namespace AcikVeri\Importer\XMLImporter;
 
 
-use AcikVeri\Importer\Models\DynamicModel;
-use SimpleXMLElement;
+use Illuminate\Database\Eloquent\Model;
 
 class XMLImporterRelation
 {
-    private $model;
-    private $parser;
-    private $xml;
-    private $loopIndex;
+    public $model;
+    public $importer;
+    public $xml;
+    public $index;
 
-    public function setModel(DynamicModel $model): void
+    public function __construct(Model $model = null, XMLImporter $importer = null, \SimpleXMLElement $xml = null, int $index = null)
     {
         $this->model = $model;
-    }
-
-
-    public function setParser(XMLImporter $parser): void
-    {
-        $this->parser = $parser;
-    }
-
-
-    public function setXml(SimpleXMLElement $xml): void
-    {
+        $this->importer = $importer;
         $this->xml = $xml;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getModel(): DynamicModel
-    {
-        return $this->model;
-    }
-
-    /**
-     * @return XMLImporter
-     */
-    public function getParser()
-    {
-        return $this->parser;
-    }
-
-    /**
-     * @return SimpleXMLElement
-     */
-    public function getXml()
-    {
-        return $this->xml;
-    }
-
-    /**
-     * @param integer $loopIndex
-     * @return void
-     */
-    public function setLoopIndex($loopIndex)
-    {
-        $this->loopIndex = $loopIndex;
-    }
-
-    /**
-     * @return int
-     */
-    public function getLoopIndex()
-    {
-        return $this->loopIndex;
+        $this->index = $index;
     }
 }
