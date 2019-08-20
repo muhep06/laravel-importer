@@ -32,7 +32,6 @@ class XMLImporter
      */
     public function loadFromString(string $xml)
     {
-        $client = new Client();
         $this->xml = simplexml_load_string($xml);
         return $this;
     }
