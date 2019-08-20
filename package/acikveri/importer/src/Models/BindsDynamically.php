@@ -1,6 +1,6 @@
 <?php
 
-namespace Muhep\ExchangeRates\Models;
+namespace AcikVeri\Importers\Models;
 
 trait BindsDynamically
 {
