@@ -5,31 +5,38 @@ namespace AcikVeri\Importer\JSONImporter;
 
 
 use AcikVeri\Importer\Interfaces\Importer;
-use AcikVeri\Importers\Models\DynamicModel;
+use AcikVeri\Importer\Models\DynamicModel;
 use GuzzleHttp\Client;
 
 
 class JSONImporter implements Importer
 {
-    private $data;
+    private $json;
+    private $index;
+    private $include;
+    private $table;
 
-    /**
-     * @param $url
-     * @return $this
+    public function __construct()
+    {
+        $this->include = [];
+    }
+
+    /*
+     * @param string $url
      */
     public function loadFromUrl($url)
     {
         $client = new Client();
-        $this->data = $client->get($url);
+        $this->json = json_decode($client->get($url)->getBody());
         return $this;
     }
 
-    /**
+    /*
      * @param $data
      * @return $this
      */
     public function loadFromString($data) {
-        $this->data = json_decode($data);
+        $this->json = json_decode($data);
         return $this;
     }
 
@@ -89,8 +96,8 @@ class JSONImporter implements Importer
     public function update()
     {
         $data = $this->include;
-        $xml = simplexml_load_string($this->data);
-        $indexes = $xml->xpath($this->index);
+        $json = $this->json;
+        $indexes = $json->xpath($this->index);
 
         foreach ($data as $tableName=>$table) {
             if (SchemaCreator::isEmpty($tableName)) {
@@ -124,8 +131,8 @@ class JSONImporter implements Importer
     public function import()
     {
         $data = $this->include;
-        $xml = simplexml_load_string($this->data);
-        $indexes = $xml->xpath($this->index);
+        $json = $this->json;
+        $indexes = $json->xpath($this->index);
         foreach ($data as $tableName=>$table) {
             if (!SchemaCreator::isEmpty($tableName)) {
                 break;
@@ -134,9 +141,9 @@ class JSONImporter implements Importer
             foreach ($indexes as $index) {
                 $model = new DynamicModel();
                 $model->setTable($tableName);
-                $relation = new XMLParserRelation();
+                $relation = new JSONImporterRelation();
                 $relation->setModel($model);
-                $relation->setXml($xml);
+                $relation->setJson($json);
                 $relation->setParser($this);
                 $relation->setLoopIndex($i);
                 foreach ($index as $key=>$path) {

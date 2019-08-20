@@ -3,7 +3,7 @@
 
 namespace AcikVeri\Importer\JSONImporter;
 
-use AcikVeri\Importers\Models\DynamicModel;
+use AcikVeri\Importer\Models\DynamicModel;
 
 class JSONImporterRelation
 {

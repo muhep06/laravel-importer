@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "package/acikveri/importer",
-                "reference": "d48ab80416a6ab878d64f885747f4c91ef69c6ac"
+                "reference": "a1e9d55229bba6d92d228238e1644fd04666f668"
             },
             "require": {
                 "ext-json": "*",
