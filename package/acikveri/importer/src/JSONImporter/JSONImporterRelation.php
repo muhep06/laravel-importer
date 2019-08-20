@@ -3,67 +3,20 @@
 
 namespace AcikVeri\Importer\JSONImporter;
 
-use AcikVeri\Importer\Models\DynamicModel;
+use Illuminate\Database\Eloquent\Model;
 
 class JSONImporterRelation
 {
-    private $model;
-    private $parser;
-    private $json;
-    private $loopIndex;
+    public $model;
+    public $importer;
+    public $json;
+    public $index;
 
-    public function setModel(DynamicModel $model): void
+    public function __construct(Model $model = null, JSONImporter $importer = null,  $json = null, int $index = null)
     {
         $this->model = $model;
-    }
-
-
-    public function setParser(JSONImporter $parser): void
-    {
-        $this->parser = $parser;
-    }
-
-
-    public function setJson($json): void
-    {
+        $this->importer = $importer;
         $this->json = $json;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getModel(): DynamicModel
-    {
-        return $this->model;
-    }
-
-    /**
-     * @return JSONImporter
-     */
-    public function getParser()
-    {
-        return $this->parser;
-    }
-
-    public function getJson()
-    {
-        return $this->json;
-    }
-
-    /**
-     * @param integer $loopIndex
-     * @return void
-     */
-    public function setLoopIndex($loopIndex)
-    {
-        $this->loopIndex = $loopIndex;
-    }
-
-    /**
-     * @return int
-     */
-    public function getLoopIndex()
-    {
-        return $this->loopIndex;
+        $this->index = $index;
     }
 }

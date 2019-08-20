@@ -3,8 +3,6 @@
 
 namespace AcikVeri\Importer\JSONImporter;
 
-
-use AcikVeri\Importer\Interfaces\Importer;
 use AcikVeri\Importer\Models\DynamicModel;
 use GuzzleHttp\Client;
 
@@ -12,17 +10,13 @@ use GuzzleHttp\Client;
 class JSONImporter implements Importer
 {
     public $json;
-    private $index;
+    public $index;
     private $include;
     private $table;
 
-    public function __construct()
-    {
-        $this->include = [];
-    }
-
-    /*
+    /**
      * @param string $url
+     * @return $this
      */
     public function loadFromUrl($url)
     {
@@ -31,26 +25,20 @@ class JSONImporter implements Importer
         return $this;
     }
 
-    /*
-     * @param $data
+    /**
+     * @param string $json
      * @return $this
      */
-    public function loadFromString($data) {
-        $this->json = json_decode($data);
+    public function loadFromString($json) {
+
+        $client = new Client();
+        $this->json = json_decode($json);
         return $this;
     }
 
-    /*
-     * @param string $key
-     */
-    public function setIndex(string $key)
-    {
-        $this->index = $key;
-        return $this;
-    }
-
-    /*
-     * @param string $table
+    /**
+     * @param $table
+     * @return $this
      */
     public function setTable($table)
     {
@@ -59,99 +47,53 @@ class JSONImporter implements Importer
         return $this;
     }
 
-    /*
-     * @param string
+    /**
+     * @param $column
+     * @param $key
+     * @return $this
      */
 
     public function insert($column, $key) {
         $this->include[$this->table][$column] = $key;
         return $this;
     }
-
-    /*
-     * @param string $column, $key
+    /**
+     * @param $column
+     * @param Closure $callback
+     * @return $this
      */
-    public function relation($column, \Closure $callback) {
-        //$this->include[$this->table]['relation'] = [ 'column' => $column ];
+    public function relation($column, Closure $callback)
+    {
         $this->include[$this->table]['relation'] = [ 'column' => $column, 'closure' => $callback ];
         return $this;
     }
 
-    /**
-     * @return array
-     */
-    public function getIncludes()
+    public function get(string $path)
     {
-        return $this->include;
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getIndex()
-    {
-        return $this->index;
-    }
-
-    public function update()
-    {
-        $data = $this->include;
-        $json = $this->json;
-        $indexes = $json->xpath($this->index);
-
-        foreach ($data as $tableName=>$table) {
-            if (SchemaCreator::isEmpty($tableName)) {
-                break;
-            }
-            $model = new DynamicModel();
-            $model->setTable($tableName);
-            foreach ($model->get() as $key=>$col) {
-                foreach ($table as $itemName=>$item) {
-                    if ($itemName !== 'relation') {
-                        $path = $indexes[$key]->xpath($item)[0];
-                        if ($path == "") {
-                            $path = null;
-                        }
-                        if ($col[$itemName] !== $path) {
-                            if ($path == "") {
-                                $path = null;
-                            }
-                            $model->where('id', $col['id'])->update([ $item => $path ]);
-                        }
-                    }
-                }
-            }
+        $load = $this->json;
+        foreach (explode('.', $path) as $item) {
+            $load = $load->{$item};
         }
-        return $this;
+        return $load;
     }
 
-    /*
-     * @param array $data
+    /**
+     * @return void
      */
-    public function import()
-    {
-        $data = $this->include;
-        $json = $this->json;
-        $indexes = $json->xpath($this->index);
-        foreach ($data as $tableName=>$table) {
-            if (!SchemaCreator::isEmpty($tableName)) {
-                break;
-            }
+    public function import() {
+        $json = $this->get($this->index);
+        foreach ($this->include as $tableName=>$tables) {
             $i = 1;
-            foreach ($indexes as $index) {
+            foreach ($json as $index) {
                 $model = new DynamicModel();
                 $model->setTable($tableName);
-                $relation = new JSONImporterRelation();
-                $relation->setModel($model);
-                $relation->setJson($json);
-                $relation->setParser($this);
-                $relation->setLoopIndex($i);
+                $relation = new JSONImporterRelation($model, $this, $this->json, $i);
                 foreach ($index as $key=>$path) {
-                    foreach ($table as $itemName=>$item) {
-                        if ($itemName !== 'relation') {
+                    foreach ($tables as $column=>$item) {
+                        if ($column !== 'relation') {
                             if ($key == $item) {
                                 if ($path != null && $path != '') {
-                                    $model->{$itemName} = $path;
+                                    $model->{$column} = $path;
                                 }
                             }
                         } else {
@@ -162,7 +104,6 @@ class JSONImporter implements Importer
                                 } else {
                                     $model->{$item['column']} = $i;
                                 }
-
                             }
                         }
                     }
