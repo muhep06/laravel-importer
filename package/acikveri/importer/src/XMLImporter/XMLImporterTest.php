@@ -84,9 +84,11 @@ class XMLImporterTest
     public function import() {
         $xml = $this->get($this->index);
         foreach ($this->include as $tableName=>$tables) {
+            $i = 1;
             foreach ($xml as $index) {
                 $model = new DynamicModel();
                 $model->setTable($tableName);
+                $relation = new XMLImporterRelationTest($model, $this, $this->xml, $i);
                 foreach ($index as $key=>$path) {
                     foreach ($tables as $column=>$item) {
                         if ($column !== 'relation') {
@@ -97,11 +99,17 @@ class XMLImporterTest
                             }
                         } else {
                             if (is_array($item)) {
-
+                                $return = $item['closure'](new DynamicModel(), $relation);
+                                if ($return !== null) {
+                                    $model->{$item['column']} = $return;
+                                } else {
+                                    $model->{$item['column']} = $i;
+                                }
                             }
                         }
                     }
                 }
+                $i++;
                 $model->save();
             }
         }
