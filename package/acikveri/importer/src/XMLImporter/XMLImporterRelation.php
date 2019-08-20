@@ -1,10 +1,9 @@
 <?php
 
 
-namespace Muhep\ExchangeRates\Utils;
+namespace AcikVeri\Importer\XMLImporter;
 
 
-use AcikVeri\Importer\XMLImporter\XMLImporter;
 use AcikVeri\Importers\Models\DynamicModel;
 use SimpleXMLElement;
 
