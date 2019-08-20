@@ -1,5 +1,5 @@
 {
-    "name": "muhep06/importer",
+    "name": "acikveri/importer",
     "description": "AcikVeri Importer",
     "type": "library",
     "license": "MIT",
@@ -19,5 +19,18 @@
         "guzzlehttp/guzzle": "~6.0",
         "ext-simplexml": "*",
         "ext-json": "*"
-    }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "AcikVeri\\Importer\\Providers\\ImporterServiceProvider"
+            ]
+        }
+    },
+    "repositories": [
+        {
+            "type": "path",
+            "url": "package\\acikveri\\testpackage"
+        }
+    ]
 }
