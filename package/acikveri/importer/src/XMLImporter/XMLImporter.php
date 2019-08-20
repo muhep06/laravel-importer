@@ -4,11 +4,12 @@
 namespace AcikVeri\Importer\XMLImporter;
 
 
+use AcikVeri\Importer\Interfaces\Importer;
 use AcikVeri\Importer\Models\DynamicModel;
 use Closure;
 use GuzzleHttp\Client;
 
-class XMLImporter
+class XMLImporter implements Importer
 {
     public $xml;
     public $index;
@@ -40,7 +41,7 @@ class XMLImporter
      * @param $table
      * @return $this
      */
-    public function setTable($table)
+    public function setTable(string $table)
     {
         $this->include[$table] = [];
         $this->table = $table;
@@ -52,7 +53,7 @@ class XMLImporter
      * @param $key
      * @return $this
      */
-    public function insert($column, $key)
+    public function insert(string $column, string $key)
     {
         $this->include[$this->table][$column] = $key;
         return $this;
@@ -63,7 +64,7 @@ class XMLImporter
      * @param Closure $callback
      * @return $this
      */
-    public function relation($column, Closure $callback)
+    public function relation(string $column, Closure $callback)
     {
         $this->include[$this->table]['relation'] = [ 'column' => $column, 'closure' => $callback ];
         return $this;

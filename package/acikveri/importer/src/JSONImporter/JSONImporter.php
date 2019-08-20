@@ -3,12 +3,13 @@
 
 namespace AcikVeri\Importer\JSONImporter;
 
+use AcikVeri\Importer\Interfaces\Importer;
 use AcikVeri\Importer\Models\DynamicModel;
 use GuzzleHttp\Client;
 use Closure;
 
 
-class JSONImporter
+class JSONImporter implements Importer
 {
     public $json;
     public $index;
@@ -19,7 +20,7 @@ class JSONImporter
      * @param string $url
      * @return $this
      */
-    public function loadFromUrl($url)
+    public function loadFromUrl(string $url)
     {
         $client = new Client();
         $this->json = json_decode($client->get($url)->getBody());
@@ -30,7 +31,7 @@ class JSONImporter
      * @param string $json
      * @return $this
      */
-    public function loadFromString($json) {
+    public function loadFromString(string $json) {
 
         $this->json = json_decode($json);
         return $this;
@@ -40,7 +41,7 @@ class JSONImporter
      * @param $table
      * @return $this
      */
-    public function setTable($table)
+    public function setTable(string $table)
     {
         $this->include[$table] = [];
         $this->table = $table;
@@ -53,7 +54,7 @@ class JSONImporter
      * @return $this
      */
 
-    public function insert($column, $key) {
+    public function insert(string $column, string $key) {
         $this->include[$this->table][$column] = $key;
         return $this;
     }
@@ -62,7 +63,7 @@ class JSONImporter
      * @param Closure $callback
      * @return $this
      */
-    public function relation($column, Closure $callback)
+    public function relation(string $column, Closure $callback)
     {
         $this->include[$this->table]['relation'] = [ 'column' => $column, 'closure' => $callback ];
         return $this;
