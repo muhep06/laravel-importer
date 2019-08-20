@@ -1,6 +1,6 @@
 <?php
 
-namespace AcikVeri\Importers\Models;
+namespace AcikVeri\Importer\Models;
 
 trait BindsDynamically
 {

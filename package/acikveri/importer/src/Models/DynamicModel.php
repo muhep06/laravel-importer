@@ -1,7 +1,7 @@
 <?php
 
 
-namespace AcikVeri\Importers\Models;
+namespace AcikVeri\Importer\Models;
 
 
 use Webpatser\Uuid\Uuid;

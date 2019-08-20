@@ -4,7 +4,7 @@
 namespace AcikVeri\Importer\XMLImporter;
 
 
-use AcikVeri\Importers\Models\DynamicModel;
+use AcikVeri\Importer\Models\DynamicModel;
 use SimpleXMLElement;
 
 class XMLImporterRelation
