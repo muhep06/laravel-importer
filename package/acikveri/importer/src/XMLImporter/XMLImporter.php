@@ -9,7 +9,7 @@ use GuzzleHttp\Client;
 
 class XMLImporter
 {
-    private $data;
+    public $xml;
     private $index;
     private $include;
     private $table;
@@ -24,7 +24,7 @@ class XMLImporter
      */
     public function loadXmlFromUrl($url) {
         $client = new Client();
-        $this->data = $client->get($url)->getBody();
+        $this->xml = simplexml_load_string($client->get($url)->getBody());
         return $this;
     }
 
@@ -33,7 +33,7 @@ class XMLImporter
      */
     public function loadXmlFromString($data)
     {
-        $this->data = $data;
+        $this->xml = simplexml_load_string($data);
         return $this;
     }
 
@@ -93,7 +93,7 @@ class XMLImporter
     public function update()
     {
         $data = $this->include;
-        $xml = simplexml_load_string($this->data);
+        $xml = $this->xml;
         $indexes = $xml->xpath($this->index);
 
         foreach ($data as $tableName=>$table) {
@@ -128,7 +128,7 @@ class XMLImporter
     public function import()
     {
         $data = $this->include;
-        $xml = simplexml_load_string($this->data);
+        $xml = $this->xml;
         $indexes = $xml->xpath($this->index);
         foreach ($data as $tableName=>$table) {
             if (!SchemaCreator::isEmpty($tableName)) {
@@ -138,7 +138,7 @@ class XMLImporter
             foreach ($indexes as $index) {
                 $model = new DynamicModel();
                 $model->setTable($tableName);
-                $relation = new XMLParserRelation();
+                $relation = new XMLImporterRelation();
                 $relation->setModel($model);
                 $relation->setXml($xml);
                 $relation->setParser($this);
