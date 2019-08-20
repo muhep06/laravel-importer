@@ -11,7 +11,7 @@ use GuzzleHttp\Client;
 
 class JSONImporter implements Importer
 {
-    private $json;
+    public $json;
     private $index;
     private $include;
     private $table;
