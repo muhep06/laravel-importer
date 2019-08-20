@@ -22,7 +22,7 @@ class XMLImporter
     /*
      * @param string $url
      */
-    public function loadXmlFromUrl($url) {
+    public function loadFromUrl($url) {
         $client = new Client();
         $this->xml = simplexml_load_string($client->get($url)->getBody());
         return $this;
@@ -31,7 +31,7 @@ class XMLImporter
     /*
      * @param string $data
      */
-    public function loadXmlFromString($data)
+    public function loadFromString($data)
     {
         $this->xml = simplexml_load_string($data);
         return $this;
