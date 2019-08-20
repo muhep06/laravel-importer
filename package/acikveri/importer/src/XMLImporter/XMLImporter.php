@@ -69,9 +69,12 @@ class XMLImporter
         return $this;
     }
 
-    public function get(string $path)
+    public function get(string $path = null)
     {
         $load = $this->xml;
+        if ($path == null) {
+            return $load;
+        }
         foreach (explode('.', $path) as $item) {
             $load = $load->{$item};
         }
