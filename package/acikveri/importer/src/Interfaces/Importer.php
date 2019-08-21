@@ -9,11 +9,11 @@ interface Importer
 {
     public function loadFromUrl(string $url);
     public function loadFromString(string $data);
-    public function setTable(string $table);
+    public function setModel(string $table);
     public function insert(string $column, string $key);
     public function get(string $path = null);
     public function relation(string $column, Closure $callback);
     public function update();
-    public function import();
+    public function import(bool $fresh = false);
 
 }
