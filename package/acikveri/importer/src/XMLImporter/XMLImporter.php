@@ -8,6 +8,7 @@ use AcikVeri\Importer\Interfaces\Importer;
 use AcikVeri\Importer\Models\DynamicModel;
 use Closure;
 use GuzzleHttp\Client;
+use Illuminate\Support\Facades\Schema;
 
 class XMLImporter implements Importer
 {
@@ -89,7 +90,9 @@ class XMLImporter implements Importer
     public function import(bool $fresh = false) {
         foreach ($this->include as $tableName=>$tables) {
             if ($fresh) {
+                Schema::disableForeignKeyConstraints();
                 $tableName::truncate();
+                Schema::enableForeignKeyConstraints();
             }
             $i = 1;
             foreach ($this->get($this->index) as $index) {
@@ -105,7 +108,7 @@ class XMLImporter implements Importer
                             }
                         } else {
                             if (is_array($item)) {
-                                $return = $item['closure'](new DynamicModel(), $relation);
+                                $return = $item['closure']($relation);
                                 if ($return !== null) {
                                     $model->{$item['column']} = $return;
                                 } else {

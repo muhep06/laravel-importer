@@ -104,7 +104,7 @@ class JSONImporter implements Importer
                             }
                         } else {
                             if (is_array($item)) {
-                                $return = $item['closure'](new DynamicModel(), $relation);
+                                $return = $item['closure']($relation);
                                 if ($return !== null) {
                                     $model->{$item['column']} = $return;
                                 } else {
