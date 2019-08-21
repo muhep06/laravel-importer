@@ -87,12 +87,14 @@ class XMLImporter implements Importer
      * @param bool $fresh
      * @return void
      */
-    public function import(bool $fresh = false) {
+    public function import(bool $fresh = false, bool $ignoreForeign = false) {
         foreach ($this->include as $tableName=>$tables) {
             if ($fresh) {
-                Schema::disableForeignKeyConstraints();
+                if ($ignoreForeign)
+                    Schema::disableForeignKeyConstraints();
                 $tableName::truncate();
-                Schema::enableForeignKeyConstraints();
+                if ($ignoreForeign)
+                    Schema::enableForeignKeyConstraints();
             }
             $i = 1;
             foreach ($this->get($this->index) as $index) {

@@ -7,6 +7,7 @@ use AcikVeri\Importer\Interfaces\Importer;
 use AcikVeri\Importer\Models\DynamicModel;
 use GuzzleHttp\Client;
 use Closure;
+use Illuminate\Support\Facades\Schema;
 
 
 class JSONImporter implements Importer
@@ -85,10 +86,14 @@ class JSONImporter implements Importer
      * @param bool $fresh
      * @return void
      */
-    public function import(bool $fresh = false) {
+    public function import(bool $fresh = false, bool $ignoreForeign = false) {
         foreach ($this->include as $tableName=>$tables) {
             if ($fresh) {
+                if ($ignoreForeign)
+                    Schema::disableForeignKeyConstraints();
                 $tableName::truncate();
+                if ($ignoreForeign)
+                    Schema::enableForeignKeyConstraints();
             }
             $i = 1;
             foreach ($this->get($this->index) as $index) {
