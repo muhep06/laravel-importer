@@ -14,6 +14,6 @@ interface Importer
     public function get(string $path = null);
     public function relation(string $column, Closure $callback);
     public function update();
-    public function import(bool $fresh = false);
+    public function import(bool $fresh = false, bool $ignoreForeign = false);
 
 }
