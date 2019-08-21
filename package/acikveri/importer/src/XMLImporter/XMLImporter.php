@@ -139,7 +139,7 @@ class XMLImporter implements Importer
                             if ($path == "") {
                                 $path = null;
                             }
-                            $model->where('id', $data['id'])->update([ $item => $path ]);
+                            $model->where('id', $data['id'])->update([ $column => $path ]);
                         }
                     }
                 }
