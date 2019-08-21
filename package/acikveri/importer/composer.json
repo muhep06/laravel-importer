@@ -1,6 +1,6 @@
 {
     "name": "acikveri/importer",
-    "description": "AcikVeri Importer",
+    "description": "XML and JSON Importer",
     "type": "library",
     "license": "MIT",
     "authors": [
@@ -27,11 +27,5 @@
                 "AcikVeri\\Importer\\Providers\\ImporterServiceProvider"
             ]
         }
-    },
-    "repositories": [
-        {
-            "type": "path",
-            "url": "package\\acikveri\\testpackage"
-        }
-    ]
+    }
 }
