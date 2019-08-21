@@ -38,13 +38,13 @@ class XMLImporter implements Importer
     }
 
     /**
-     * @param $table
+     * @param string $model
      * @return $this
      */
-    public function setTable(string $table)
+    public function setModel(string $model)
     {
-        $this->include[$table] = [];
-        $this->table = $table;
+        $this->include[$model] = [];
+        $this->table = $model;
         return $this;
     }
 
@@ -83,14 +83,17 @@ class XMLImporter implements Importer
     }
 
     /**
+     * @param bool $fresh
      * @return void
      */
-    public function import() {
+    public function import(bool $fresh = false) {
         foreach ($this->include as $tableName=>$tables) {
+            if ($fresh) {
+                $tableName::truncate();
+            }
             $i = 1;
             foreach ($this->get($this->index) as $index) {
-                $model = new DynamicModel();
-                $model->setTable($tableName);
+                $model = new $tableName();
                 $relation = new XMLImporterRelation($model, $this, $this->xml, $i);
                 foreach ($index as $key=>$path) {
                     foreach ($tables as $column=>$item) {
@@ -124,8 +127,7 @@ class XMLImporter implements Importer
     public function update()
     {
         foreach ($this->include as $tableName=>$tables) {
-            $model = new DynamicModel();
-            $model->setTable($tableName);
+            $model = new $tableName();
             foreach ($model->get() as $key=>$data) {
                 foreach ($tables as $column=>$item) {
                     if ($column !== 'relation') {

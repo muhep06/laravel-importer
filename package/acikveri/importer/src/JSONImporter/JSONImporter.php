@@ -38,13 +38,13 @@ class JSONImporter implements Importer
     }
 
     /**
-     * @param $table
+     * @param string $model
      * @return $this
      */
-    public function setTable(string $table)
+    public function setModel(string $model)
     {
-        $this->include[$table] = [];
-        $this->table = $table;
+        $this->include[$model] = [];
+        $this->table = $model;
         return $this;
     }
 
@@ -82,14 +82,17 @@ class JSONImporter implements Importer
     }
 
     /**
+     * @param bool $fresh
      * @return void
      */
-    public function import() {
+    public function import(bool $fresh = false) {
         foreach ($this->include as $tableName=>$tables) {
+            if ($fresh) {
+                $tableName::truncate();
+            }
             $i = 1;
             foreach ($this->get($this->index) as $index) {
-                $model = new DynamicModel();
-                $model->setTable($tableName);
+                $model = new $tableName();
                 $relation = new JSONImporterRelation($model, $this, $this->json, $i);
                 foreach ($index as $key=>$path) {
                     foreach ($tables as $column=>$item) {
@@ -123,8 +126,7 @@ class JSONImporter implements Importer
     public function update()
     {
         foreach ($this->include as $tableName=>$tables) {
-            $model = new DynamicModel();
-            $model->setTable($tableName);
+            $model = new $tableName();
             foreach ($model->get() as $key=>$data) {
                 foreach ($tables as $column=>$item) {
                     if ($column !== 'relation') {
@@ -133,10 +135,12 @@ class JSONImporter implements Importer
                             $path = null;
                         }
                         if ($data[$column] !== $path) {
+                            echo $path . '<br>';
+                            echo $data[$column] . '<br>';
                             if ($path == "") {
                                 $path = null;
                             }
-                            $model->where('id', $data['id'])->update([ $item => $path ]);
+                            $model->where('id', $data['id'])->update([ $column => $path ]);
                         }
                     }
                 }
