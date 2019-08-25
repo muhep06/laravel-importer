@@ -5,7 +5,6 @@ namespace AcikVeri\Importer\XMLImporter;
 
 
 use AcikVeri\Importer\Interfaces\Importer;
-use AcikVeri\Importer\Models\DynamicModel;
 use Closure;
 use GuzzleHttp\Client;
 use Illuminate\Support\Facades\Schema;
@@ -21,9 +20,11 @@ class XMLImporter implements Importer
      * @param string $url
      * @return $this
      */
-    public function loadFromUrl(string $url)
+    public function loadFromUrl(string $url, array $headers = [])
     {
-        $client = new Client();
+        $client = new Client([
+            'headers' => $headers
+        ]);
         $this->xml = simplexml_load_string($client->get($url)->getBody());
         return $this;
     }
@@ -87,15 +88,8 @@ class XMLImporter implements Importer
      * @param bool $fresh
      * @return void
      */
-    public function import(bool $fresh = false, bool $ignoreForeign = false) {
+    public function import() {
         foreach ($this->include as $tableName=>$tables) {
-            if ($fresh) {
-                if ($ignoreForeign)
-                    Schema::disableForeignKeyConstraints();
-                $tableName::truncate();
-                if ($ignoreForeign)
-                    Schema::enableForeignKeyConstraints();
-            }
             $i = 1;
             foreach ($this->get($this->index) as $index) {
                 $model = new $tableName();
