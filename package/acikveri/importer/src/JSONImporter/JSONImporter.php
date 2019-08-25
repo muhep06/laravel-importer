@@ -4,7 +4,6 @@
 namespace AcikVeri\Importer\JSONImporter;
 
 use AcikVeri\Importer\Interfaces\Importer;
-use AcikVeri\Importer\Models\DynamicModel;
 use GuzzleHttp\Client;
 use Closure;
 use Illuminate\Support\Facades\Schema;
@@ -19,11 +18,14 @@ class JSONImporter implements Importer
 
     /**
      * @param string $url
+     * @param array $headers
      * @return $this
      */
-    public function loadFromUrl(string $url)
+    public function loadFromUrl(string $url, array $headers = [])
     {
-        $client = new Client();
+        $client = new Client([
+            'headers' => $headers
+        ]);
         $this->json = json_decode($client->get($url)->getBody());
         return $this;
     }
@@ -86,41 +88,51 @@ class JSONImporter implements Importer
      * @param bool $fresh
      * @return void
      */
-    public function import(bool $fresh = false, bool $ignoreForeign = false) {
+    public function import() {
         foreach ($this->include as $tableName=>$tables) {
-            if ($fresh) {
-                if ($ignoreForeign)
-                    Schema::disableForeignKeyConstraints();
-                $tableName::truncate();
-                if ($ignoreForeign)
-                    Schema::enableForeignKeyConstraints();
-            }
             $i = 1;
-            foreach ($this->get($this->index) as $index) {
-                $model = new $tableName();
-                $relation = new JSONImporterRelation($model, $this, $this->json, $i);
-                foreach ($index as $key=>$path) {
-                    foreach ($tables as $column=>$item) {
-                        if ($column !== 'relation') {
-                            if ($key == $item) {
-                                if ($path != null && $path != '') {
+            $model = new $tableName();
+            $relation = new JSONImporterRelation($model, $this, $this->json, $i);
+            foreach ($this->get($this->index) as $jsonKey=>$index) {
+                if (is_array($this->get($this->index))) {
+                    $model = new $tableName();
+                    $relation->model = $model;
+                    $relation->index = $i;
+                    foreach ($index as $key => $path) {
+                        foreach ($tables as $column => $item) {
+                            if ($column !== 'relation') {
+                                if ($key == $item) {
                                     $model->{$column} = $path;
                                 }
-                            }
-                        } else {
-                            if (is_array($item)) {
-                                $return = $item['closure']($relation);
-                                if ($return !== null) {
-                                    $model->{$item['column']} = $return;
-                                } else {
-                                    $model->{$item['column']} = $i;
+                            } else {
+                                if (is_array($item)) {
+                                    $return = $item['closure']($relation);
+                                    if ($return !== null) {
+                                        $model->{$item['column']} = $return;
+                                    } else {
+                                        $model->{$item['column']} = $i;
+                                    }
                                 }
                             }
                         }
                     }
+                    $i++;
+                    $model->save();
+                } else {
+                    foreach ($tables as $column=>$item) {
+                        if ($column !== 'relation') {
+                            if ($jsonKey == $item) {
+                                $model->{$column} = $index;
+                            }
+                        } else {
+                            if (is_array($item)) {
+                                $return = $item['closure']($relation);
+                                $model->{$item['column']} = $return;
+                            }
+                        }
+                    }
+                    $model->save();
                 }
-                $i++;
-                $model->save();
             }
         }
     }
