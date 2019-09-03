@@ -121,16 +121,17 @@ class XMLImporter implements Importer
     }
 
     /**
+     * @param int $start
      * @return void
      */
-    public function update()
+    public function update(int $start = 0)
     {
         foreach ($this->include as $tableName=>$tables) {
             $model = new $tableName();
             foreach ($model->get() as $key=>$data) {
                 foreach ($tables as $column=>$item) {
                     if ($column !== 'relation') {
-                        $path = $this->get($this->index)[$key]->{$item};
+                        $path = $this->get($this->index)[$key + $start]->{$item};
                         if ($path == "") {
                             $path = null;
                         }

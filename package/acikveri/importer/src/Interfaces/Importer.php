@@ -14,7 +14,7 @@ interface Importer
     public function loadFromString(string $data);
 
     // Verinin kayıt edileceği tabloya ait modelin gösterilmesi için kullanılır.
-    public function setModel(string $table);
+    public function setModel(string $model);
 
     // Kayıt edileccek veriyi ve tabloda hangi sütüna kayıt edileceğini belirtmek için kullanılır.
     public function insert(string $column, string $key);
@@ -28,7 +28,9 @@ interface Importer
 
     // Eğer kayıtlı veri var ise kayıtlı verileri yeni veriler ile karşılaştırır.
     // Yeni veride değişklik var ise kayıtlı verileri günceller.
-    public function update();
+    // $start değeri JSON ve HTML de verinin başlayacağı konumu
+    // HTML de ise modelde ki verinin başlayacağı konumu belirtir.
+    public function update(int $start = 0);
 
     // İçeri aktarma işlemini başlatır.
     public function import();
